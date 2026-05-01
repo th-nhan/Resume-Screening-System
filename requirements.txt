@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+python-multipart
+PyPDF2
+pytesseract
+pdf2image
+ollama
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib
+pydantic
+google-generativeai
+python-dotenv
