@@ -322,10 +322,15 @@ export default function App() {
     });
   }, [results, sortOrder]);
 
+  const extractEmail = (value) => {
+    const match = String(value || '').match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
+    return match ? match[0] : '';
+  };
+
   const handleSendEmail = async (res) => {
-    const email = res.candidate_email;
-    if (!email || email === 'Không có' || email.trim() === '') {
-      alert("Không tìm thấy địa chỉ email của ứng viên trong hồ sơ này!");
+    const email = extractEmail(res.candidate_email);
+    if (!email) {
+      alert("Không tìm thấy địa chỉ email hợp lệ của ứng viên trong hồ sơ này!");
       return;
     }
     const BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000' : (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000');

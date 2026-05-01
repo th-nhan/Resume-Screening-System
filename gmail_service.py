@@ -1,6 +1,8 @@
 import os.path
 import base64
 import concurrent.futures
+import re
+from email.utils import parseaddr
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -10,6 +12,23 @@ SCOPES = [
     'https://www.googleapis.com/auth/gmail.readonly',
     'https://www.googleapis.com/auth/gmail.send'
 ]
+
+EMAIL_REGEX = re.compile(r'(?<![\w.+-])([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})(?![\w.+-])')
+
+def normalize_email_address(value):
+    """Lấy địa chỉ email hợp lệ từ chuỗi AI/Gmail trả về."""
+    if not value:
+        return ""
+
+    raw_value = str(value).strip().strip("'\"")
+    _, parsed_email = parseaddr(raw_value)
+
+    for candidate in (parsed_email, raw_value):
+        match = EMAIL_REGEX.search(candidate)
+        if match:
+            return match.group(1)
+
+    return ""
 
 def get_gmail_service():
     """Xác thực và khởi tạo Gmail API Service"""
@@ -54,9 +73,7 @@ def process_ai_only(filename, sender, file_data, jd_text, read_pdf_func, extract
         
         if ai_result:
             # Trích xuất email từ trường 'From' (VD: "Name <email@example.com>" hoặc "email@example.com")
-            import re
-            email_match = re.search(r'<(.+?)>', sender)
-            sender_email = email_match.group(1) if email_match else sender.strip()
+            sender_email = normalize_email_address(sender)
             
             ai_result['filename'] = filename
             # Nếu muốn giữ tên gốc từ CV do AI bóc tách thì không ghi đè, hoặc lấy tên từ sender
@@ -131,11 +148,14 @@ def send_gmail_message(to_email, subject, body):
     """Gửi email tới ứng viên qua Gmail API"""
     from email.message import EmailMessage
     try:
+        clean_to_email = normalize_email_address(to_email)
+        if not clean_to_email:
+            return False, f"Email không hợp lệ: {to_email}"
+
         service = get_gmail_service()
         message = EmailMessage()
         message.set_content(body)
-        message['To'] = to_email
-        message['From'] = 'me'
+        message['To'] = clean_to_email
         message['Subject'] = subject
 
         encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()

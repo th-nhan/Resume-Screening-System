@@ -10,7 +10,7 @@ from fastapi import FastAPI, File, UploadFile, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
-from gmail_service import scan_gmail_attachments, send_gmail_message
+from gmail_service import normalize_email_address, scan_gmail_attachments, send_gmail_message
 
 # Cấu hình Gemini
 load_dotenv()
@@ -430,7 +430,7 @@ def process_single_cv(cv_text, jd_blueprint, filename=""):
     # Gắn thêm metadata để Frontend hiển thị
     result["filename"] = filename
     result["candidate_name"] = cv_json.get("candidate_name", "Không xác định")
-    result["candidate_email"] = cv_json.get("candidate_email", "")
+    result["candidate_email"] = normalize_email_address(cv_json.get("candidate_email", ""))
     return result, None
 
 def batch_processor(cv_data_list, jd_blueprint):
@@ -515,6 +515,10 @@ class EmailRequest(BaseModel):
 
 @app.post("/api/send-interview-email")
 async def send_interview_email(request: EmailRequest):
+    clean_email = normalize_email_address(request.email)
+    if not clean_email:
+        raise HTTPException(status_code=400, detail=f"Email không hợp lệ: {request.email}")
+
     subject = f"Thư Mời Phỏng Vấn - Chúc mừng {request.name} đã vượt qua vòng sơ loại!"
     body = f"""Chào {request.name},
     
@@ -529,7 +533,7 @@ Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại phản hồi l
 Trân trọng,
 Bộ phận Tuyển dụng
 """
-    success, msg = send_gmail_message(request.email, subject, body)
+    success, msg = send_gmail_message(clean_email, subject, body)
     if success:
         return {"message": "Đã gửi email thành công!"}
     else:
