@@ -2,9 +2,6 @@ import json
 import re
 import ollama
 import fitz  # PyMuPDF
-import pytesseract
-from PIL import Image
-import io
 import os
 import socket
 from dotenv import load_dotenv
@@ -28,12 +25,6 @@ OLLAMA_OPTIONS = {
 }
 KEEP_ALIVE = "10m"
 
-import platform
-
-# Cấu hình đường dẫn Tesseract (Chỉ dùng cho Windows, Linux/Render dùng mặc định)
-if platform.system() == "Windows":
-    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-
 # Khởi tạo FastAPI App
 app = FastAPI(title="ATS AI Pipeline API")
 
@@ -48,22 +39,17 @@ app.add_middleware(
 def read_pdf(file_bytes):
     try:
         doc = fitz.open(stream=file_bytes, filetype="pdf")
-        text = ""
-        for i, page in enumerate(doc):
-            if i >= 2: break  # Chỉ đọc tối đa 2 trang đầu
-            
+        text_parts = []
+
+        for page in doc:
             page_text = page.get_text()
             if page_text.strip():
-                text += page_text
-            else:
-                # Quét OCR nếu là file ảnh
-                try:
-                    pix = page.get_pixmap(dpi=150)
-                    img = Image.open(io.BytesIO(pix.tobytes()))
-                    text += pytesseract.image_to_string(img, lang='eng+vie')
-                except Exception as e:
-                    print(f"Cảnh báo OCR: {e}")
-                    text += "\n[Hệ thống không thể đọc được nội dung ảnh vì thiếu thư viện OCR trên máy chủ]\n"
+                text_parts.append(page_text)
+
+        text = "\n".join(text_parts).strip()
+        if not text:
+            return "", "Không đọc được chữ trong PDF. File có thể là PDF scan/ảnh, hệ thống hiện chỉ hỗ trợ text-based PDF."
+
         return text, None
     except Exception as e:
         print(f"Lỗi đọc PDF: {e}")
@@ -123,7 +109,7 @@ def call_ai_hybrid(prompt):
             return extract_json_from_text(raw_text)
         except Exception as e:
             error_logs.append(f"Gemini API Lỗi: {str(e)}")
-            print(f"Đang dùng modal tự build Ollama do Gemini lỗi: {e}")
+            print(f"Đang dùng modal tự build Ollama")
     else:
         error_logs.append("Mất kết nối Internet (hoặc bị block port 443).")
 
@@ -551,6 +537,6 @@ Bộ phận Tuyển dụng
 
 if __name__ == "__main__":
     import uvicorn, os
-    host = os.getenv("HOST", "[IP_ADDRESS]")
-    print("🚀 Khởi động Server FastAPI tại http://127.0.0.1:8000")
+    host = os.getenv("HOST", "0.0.0.0")
+    print(f"🚀 Khởi động Server FastAPI tại http://{host}:8000")
     uvicorn.run("main:app", host=host, port=8000, reload=True)

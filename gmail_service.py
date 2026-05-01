@@ -106,7 +106,7 @@ def scan_gmail_attachments(jd_text, query, max_results, read_pdf_func, extract_a
                     except Exception as e:
                         print(f"Không thể tải file {part['filename']} từ Gmail: {e}")
                     
-    # BƯỚC 2: Chỉ sử dụng đa luồng cho phần OCR PDF và AI (Nặng nhất)
+    # BƯỚC 2: Chỉ sử dụng đa luồng cho phần đọc PDF và AI (Nặng nhất)
     # Giảm xuống 2 workers để tránh quá tải Ollama cục bộ gây sập RAM
     analyzed_results = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:

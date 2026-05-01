@@ -253,7 +253,7 @@ export default function App() {
       formData.append('jd_text', jdText);
       formData.append('file', fObj.file);
 
-      const BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+      const BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000' : (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000');
 
       try {
         const response = await fetch(`${BASE_URL}/api/scan-local-cv`, {
@@ -287,7 +287,7 @@ export default function App() {
       formData.append('query', gmailQuery);
       formData.append('time_range', gmailTimeRange);
 
-      const BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+      const BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000' : (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000');
 
       const response = await fetch(`${BASE_URL}/api/scan-gmail`, {
         method: 'POST',
@@ -328,7 +328,7 @@ export default function App() {
       alert("Không tìm thấy địa chỉ email của ứng viên trong hồ sơ này!");
       return;
     }
-    const BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+    const BASE_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://127.0.0.1:8000' : (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000');
 
     try {
       const response = await fetch(`${BASE_URL}/api/send-interview-email`, {
