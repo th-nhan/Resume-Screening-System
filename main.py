@@ -77,7 +77,7 @@ def extract_json_from_text(raw_text):
             return None
     return None
 
-def check_internet(host="8.8.8.8", port=53, timeout=3):
+def check_internet(host="google.com", port=443, timeout=3):
     """Kiểm tra kết nối Internet"""
     try:
         socket.setdefaulttimeout(timeout)
