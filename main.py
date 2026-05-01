@@ -28,8 +28,11 @@ OLLAMA_OPTIONS = {
 }
 KEEP_ALIVE = "10m"
 
-# Cấu hình đường dẫn Tesseract (Sửa nếu cần)
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+import platform
+
+# Cấu hình đường dẫn Tesseract (Chỉ dùng cho Windows, Linux/Render dùng mặc định)
+if platform.system() == "Windows":
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 # Khởi tạo FastAPI App
 app = FastAPI(title="ATS AI Pipeline API")
