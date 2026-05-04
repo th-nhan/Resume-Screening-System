@@ -152,7 +152,7 @@ Google AI Studio API Key
 
 ```bash
 git clone https://github.com/your-username/cv-filtering-gemini.git
-cd cv-filtering-gemini
+cd filter_cv_ai
 ```
 
 ---
@@ -160,7 +160,6 @@ cd cv-filtering-gemini
 ### 2️⃣ Backend Setup (FastAPI + SQLite)
 
 ```bash
-cd backend
 
 # Tạo môi trường ảo
 python -m venv venv
@@ -236,7 +235,7 @@ MIT License
 
 * 👤 Developer: **Đỗ Thành Nhân**
 * 📧 Email: **[dothanhnhan1024@gmail.com](mailto:dothanhnhan1024@gmail.com)**
-* 🌐 Demo: (update link nếu có)
+* 🌐 Demo: https://resume-screening-system-gilt.vercel.app/
 * 📱 Hotline: +84 386 356 750
 
 ---
