@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📄 CV Filtering & Evaluation System
+# 📄 Resume Screening System
 
 ### ✨ AI-Powered Recruitment Platform (Google Gemini Integration)
 
